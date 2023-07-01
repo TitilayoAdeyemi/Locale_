@@ -38,8 +38,8 @@ def create_app(config=config_dict['dev']):
                 security= 'Bearer Auth'
                 )
     
-    app.register_blueprint(auth_routes, name='auth')
-    app.register_blueprint(geo_routes, name='geo')
+    api.register_blueprint(auth_routes, name='auth')
+    api.register_blueprint(geo_routes, name='geo')
 
     @api.errorhandler(MethodNotAllowed)
     def method_not_alowed():
