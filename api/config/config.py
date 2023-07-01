@@ -11,8 +11,7 @@ class Config():
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(minutes=30)
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-    MONGO_URI = os.environ.get('MONGO_URI')
-    connection_string = os.environ.get('connection_str')
+    MONGO_URI = os.environ.get('MONGODB_URI')
 
 
 
