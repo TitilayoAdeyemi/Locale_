@@ -6,8 +6,8 @@ from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 from .geo_info.views import cache
 from http import HTTPStatus
-from .auth.view import auth_routes
-from .geo_info.views import geo_routes
+from .auth.view import auth_namespace
+from .geo_info.views import geo_namespace
 
 # app = Flask(__name__)
 
@@ -38,8 +38,8 @@ def create_app(config=config_dict['dev']):
                 security= 'Bearer Auth'
                 )
     
-    api.register_blueprint(auth_routes, name='auth')
-    api.register_blueprint(geo_routes, name='geo')
+    api.add_namespace(auth_namespace, path='/api/auth')
+    api.add_namespace(geo_namespace, path='/api/geo')
 
     @api.errorhandler(MethodNotAllowed)
     def method_not_alowed():

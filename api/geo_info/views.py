@@ -12,6 +12,7 @@ from dotenv import load_dotenv, find_dotenv
 from flask_caching import Cache
 from ..caching.cache import cache
 from ..limiter.limiter import limiter
+from flask_restx import Resource, Namespace
 
 load_dotenv(find_dotenv())
 
@@ -21,14 +22,13 @@ file_path = os.path.join(current_directory, 'dataset.json')
 
 app =  Flask(__name__)
 
-geo_routes = Blueprint('auth_routes', __name__)
-
+geo_namespace = Namespace("geo", description='a namespace for geographical information')
 
 with open(r'api/models/dataset.json', 'r') as json_file:
     data = json.load(json_file)
 
-    
-class Regions(MethodView):
+@geo_namespace.route('/regions')    
+class Regions(Resource):
     @jwt_required(locations=["headers"])
     @cache.cached(timeout=300)
     @limiter.limit('3/minute')
@@ -37,19 +37,19 @@ class Regions(MethodView):
         try :
             regions = data.get('Regions')
             response = {"All regions in Nigeria": regions}
-            return jsonify(response), 200
+            return response, 200
             
         except:
             raise HTTPStatus.UNAUTHORIZED
         
         
     
-regions_view = Regions.as_view("regions")
-geo_routes.add_url_rule("/api/geo/regions",view_func=regions_view,methods=["GET"])
+# regions_view = Regions.as_view("regions")
+# geo_routes.add_url_rule("/api/geo/regions",view_func=regions_view,methods=["GET"])
 
 
-
-class States(MethodView):
+@geo_namespace.route('/states') 
+class States(Resource):
     @jwt_required()
     @cache.cached(timeout=300)
     @limiter.limit('3/minute')
@@ -58,18 +58,18 @@ class States(MethodView):
         try :
             states = data.get('States')
             response = {"All states in Nigeria": states}
-            return jsonify(response), 200
+            return response, 200
         
             
         except:
             raise HTTPStatus.UNAUTHORIZED
     
-states_view = States.as_view("states")
-geo_routes.add_url_rule("/api/geo/states",view_func=cache.cached(timeout=300)(states_view),methods=["GET"])
+# states_view = States.as_view("states")
+# geo_routes.add_url_rule("/api/geo/states",view_func=cache.cached(timeout=300)(states_view),methods=["GET"])
 
 
-
-class LGAs(MethodView):
+@geo_namespace.route('/lgas') 
+class LGAs(Resource):
     @jwt_required()
     @cache.cached(timeout=300)
     @limiter.limit('3/minute')
@@ -78,19 +78,19 @@ class LGAs(MethodView):
         try :
             lgas = data.get('LGAs')
             response = {"All LGAs in Nigeria": lgas}
-            return jsonify(response), 200
+            return response, 200
             
         except:
             raise HTTPStatus.UNAUTHORIZED
         
         
     
-lgas_view = LGAs.as_view("lgas")
-geo_routes.add_url_rule("/api/geo/lgas",view_func=lgas_view,methods=["GET"])
+# lgas_view = LGAs.as_view("lgas")
+# geo_routes.add_url_rule("/api/geo/lgas",view_func=lgas_view,methods=["GET"])
 
 
-
-class StatesInRegion(MethodView):
+@geo_namespace.route('/states/<int:region_id>') 
+class StatesInRegion(Resource):
     @jwt_required()
     @cache.cached(timeout=300)
     @limiter.limit('3/minute')
@@ -106,22 +106,23 @@ class StatesInRegion(MethodView):
         
         return {f'states in region {region_id}': region_states}
 
-geo_routes.add_url_rule('/api/geo/states/<int:region_id>', view_func=StatesInRegion.as_view('states_in_region'), methods = ['GET'])
+# geo_routes.add_url_rule('/api/geo/states/<int:region_id>', view_func=StatesInRegion.as_view('states_in_region'), methods = ['GET'])
 
 
-
-class LgasInState(MethodView):
+@geo_namespace.route('/lgas/<int:state_id>')
+class LgasInState(Resource):
     @jwt_required()
     @cache.cached(timeout=300)
     def get(self, state_id):
-        lgas = data.get('lgas')
+        lgas = data.get('LGAs')
         
         # Filter LGAs based on state_id and return every LGA in a state
         state_lgas = [lga for lga in lgas if int(lga['state_id']) == state_id]
+        print(state_lgas)
         
         if state_id > 36:
             return {'message' : f"State {state_id} does not exist"}
         
         return {f'LGAs in state {state_id}': state_lgas}
 
-geo_routes.add_url_rule('/api/geo/lgas/<int:state_id>', view_func=LgasInState.as_view('lgas_in_state'), methods = ['GET'])
+# geo_routes.add_url_rule('/api/geo/lgas/<int:state_id>', view_func=LgasInState.as_view('lgas_in_state'), methods = ['GET'])

@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint, request, jsonify
-from flask_restx import Namespace, Api, fields
+from flask_restx import Namespace, Api, fields, Resource
 import bcrypt, string, secrets
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from http import HTTPStatus
@@ -13,14 +13,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-auth_routes = Blueprint('auth_routes', __name__)
+# auth_routes = Blueprint('auth_routes', __name__)
 mongo = connect_to_db()
 
-api = Api(app)
+# api = Api(app)
 
 auth_namespace = Namespace('auth', description='A Namespace for authentication')
 
-api.add_namespace(auth_namespace)
+# api.add_namespace(auth_namespace)
 
 signup_model = auth_namespace.model(
     'signup', {
@@ -51,27 +51,25 @@ def generate_apikey(length=32):
     apikey = ''.join(secrets.choice(characters) for _ in range(length))
     return apikey
 
-
-class SignUp(MethodView):
+@auth_namespace.route('/register')
+class SignUp(Resource):
+    @auth_namespace.expect(signup_model)
     def post(self):
-        data = api.payload
+        data = request.get_json()
         try:
-            name = data['name']
-            email = data['email']
-            password = data['password']
             
-            existing_user = mongo.users.find_one({'email': email})
+            existing_user = mongo.users.find_one({'email': data['email']})
             
             if existing_user:
                 return {'message': 'User already exists'}, 409
 
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
 
             apikey = generate_apikey()
             
             user = {
-                'name': name,
-                'email' : email,
+                'name': data['name'],
+                'email' : data['email'],
                 'password': hashed_password,
                 'apikey': generate_apikey()
             }
@@ -79,19 +77,16 @@ class SignUp(MethodView):
 
             return {
                 'message': 'User registered successfully'
-                # 'Your apikey is ' : apikey
                     }, 201
         
         except Exception as e:
                 # raise Conflict(f'User with email {data.get("email")} already exists')
-                print(e)
                 raise Conflict(f'{e}')
 
-register_view = SignUp.as_view("register")
-auth_routes.add_url_rule("/api/auth/register",view_func=register_view,methods=["POST"])
 
-    
-class Login(MethodView):
+@auth_namespace.route('/login')
+class Login(Resource):
+    @auth_namespace.expect(login_model)
     def post(self):
         data = request.get_json()
         try:
@@ -128,15 +123,11 @@ class Login(MethodView):
             raise BadRequest('Invalid username or password')
 
 
-# Register the route
-login_view = Login.as_view('login')
-auth_routes.add_url_rule('/api/auth/login', view_func=login_view, methods=['POST'])
-
-   
-class Refresh(MethodView):
+@auth_namespace.route('/refresh')
+class Refresh(Resource):
     @jwt_required(refresh=True)
     def post(self):
-        # try:
+        try:
             name = get_jwt_identity()
 
             access_token = create_access_token(identity=name)
@@ -144,11 +135,8 @@ class Refresh(MethodView):
 
             return{"access_token": access_token}, HTTPStatus.OK
         
-        # except:
+        except:
             return {"message": "Refresh token has expired"}, HTTPStatus.UNAUTHORIZED
-            
-    
-refresh_view = Login.as_view("refresh")
-auth_routes.add_url_rule("/api/auth/refresh",view_func=refresh_view,methods=["POST"])
+  
    
  
