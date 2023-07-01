@@ -24,7 +24,7 @@ app =  Flask(__name__)
 geo_routes = Blueprint('auth_routes', __name__)
 
 
-with open(r'C:\Users\USER\Desktop\LOCALE1\api\models\dataset.json', 'r') as json_file:
+with open(r'C:\Users\USER\Desktop\Locale_\api\models\dataset.json', 'r') as json_file:
     data = json.load(json_file)
 
     
