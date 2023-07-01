@@ -4,7 +4,7 @@ from ..config.config import Config
 
 
 def connect_to_db():
-    client = MongoClient(Config.MONGOBD_URI)
+    client = MongoClient(Config.MONGODB_URI)
     return client.locale
 
 
