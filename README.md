@@ -24,22 +24,22 @@ Get detailed geographical information about Nigeria.
 - **HTTP Method:** GET
 - **Endpoint:** `/regions`
 - **Description:** Retrieves all Nigeria's geographical regions and information associated with it.
-
+---
 - **HTTP Method:** GET
 - **Endpoint:** `/states`
 - **Description:** Retrieves all the states in Nigeria and all the geographical information associated with it.
 
-
+---
 - **HTTP Method:** GET
 - **Endpoint:** `/LGAS`
 - **Description:** Retrieves all the Local Government Areas in Nigeria and all the geographical information associated with it.
 
-
+---
 
 - **HTTP Method:** GET
 - **Endpoint:** `/states/<int:region_id>`
 - **Description:** Retrieves all the states in a particular region and the geographical information associated with it.
-
+---
 - **HTTP Method:** GET
 - **Endpoint:** `/lgas/<int:state_id>`
 - **Description:** Retrieves all the LGAs in a particular state and the geographical information associated with it.
