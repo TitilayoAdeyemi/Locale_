@@ -45,13 +45,14 @@ Get detailed geographical information about Nigeria.
 - **Description:** Retrieves all the LGAs in a particular state and the geographical information associated with it.
 
 Locale API also contains information such as:
-- landmass
-- population
-- dialect
+- landmass of each state
+- population of each state
+- dialect spoken in each state
 - longitude and latitude
-- state website
+- state websites
+- state slogans
+- Heads of State who created each state
 - date of creation of states
-- state borders
-- state website
-- Fun facts about each state (what a state is known for)
+- Borders of state and LGAs
+- Fun facts about each state (what a state is known for/ Tourist attractions)
 
